@@ -16,7 +16,7 @@ var (
 )
 
 func NewNegativationRepositoryArangoDB(database driver.Database) (*NegativationRepositoryArangoDB, error) {
-	collection, err := createCollection(database, "negativations")
+	collection, err := CreateCollection(database, "negativations")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create negativations' collection")
 	}
@@ -58,15 +58,4 @@ RETURN negativation
 		negativations = append(negativations, &negativation)
 	}
 	return negativations, nil
-}
-
-func createCollection(database driver.Database, collectionName string) (driver.Collection, error) {
-	exists, err := database.CollectionExists(nil, collectionName)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return database.CreateCollection(nil, collectionName, nil)
-	}
-	return database.Collection(nil, collectionName)
 }
