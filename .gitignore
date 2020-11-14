@@ -1,0 +1,5 @@
+.idea
+vendor
+go.sum
+.test
+.bin
