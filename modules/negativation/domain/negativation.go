@@ -1,6 +1,14 @@
 package domain
 
-import "time"
+import (
+	"github.com/pkg/errors"
+	"time"
+)
+
+var (
+	InvalidDebtDateFormat      = errors.New("invalid debt date format")
+	InvalidInclusionDateFormat = errors.New("invalid inclusion date format")
+)
 
 func NewNegativation(
 	companyDocument string,
@@ -8,18 +16,26 @@ func NewNegativation(
 	customerDocument CPF,
 	value float64,
 	contract string,
-	debtDate time.Time,
-	inclusionDate time.Time,
-) *Negativation {
+	rawDebtDate string,
+	rawInclusionDate string,
+) (*Negativation, error) {
+	debtDate, err := time.Parse(time.RFC3339, rawDebtDate)
+	if err != nil {
+		return nil, InvalidDebtDateFormat
+	}
+	inclusionDate, err := time.Parse(time.RFC3339, rawInclusionDate)
+	if err != nil {
+		return nil, InvalidInclusionDateFormat
+	}
 	return &Negativation{
 		CompanyDocument:  companyDocument,
 		CompanyName:      companyName,
 		CustomerDocument: customerDocument,
 		Value:            value,
 		Contract:         contract,
-		DebtDate:         debtDate,
-		InclusionDate:    inclusionDate,
-	}
+		DebtDate:         debtDate.UTC(),
+		InclusionDate:    inclusionDate.UTC(),
+	}, nil
 }
 
 type Negativation struct {
