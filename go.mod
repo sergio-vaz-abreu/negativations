@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/arangodb/go-driver v0.0.0-20201106193344-56ae8fd24510
+	github.com/cossacklabs/themis/gothemis v0.13.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/onsi/gomega v1.10.3
 	github.com/pkg/errors v0.9.1

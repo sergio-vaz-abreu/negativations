@@ -1,6 +1,9 @@
 package domain
 
 import (
+	"encoding/base64"
+	"github.com/cossacklabs/themis/gothemis/cell"
+	"github.com/cossacklabs/themis/gothemis/keys"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -55,4 +58,47 @@ type Negativation struct {
 func (negativation *Negativation) UTC() {
 	negativation.DebtDate = negativation.DebtDate.UTC()
 	negativation.InclusionDate = negativation.InclusionDate.UTC()
+}
+
+func (negativation *Negativation) Encrypt(symmetricKey string, encryptionContext string) error {
+	keyBytes, err := base64.StdEncoding.DecodeString(symmetricKey)
+	if err != nil {
+		return err
+	}
+	cell, err := cell.ContextImprintWithKey(&keys.SymmetricKey{Value: keyBytes})
+	if err != nil || cell == nil {
+		return err
+	}
+	encrypted, err := cell.Encrypt([]byte(negativation.CustomerDocument), []byte(encryptionContext))
+	if err != nil {
+		return err
+	}
+	encryptedCpf := base64.StdEncoding.EncodeToString(encrypted)
+	negativation.CustomerDocument = CPF(encryptedCpf)
+	return nil
+}
+
+func (negativation *Negativation) Decrypt(symmetricKey string, encryptionContext string) error {
+	keyBytes, err := base64.StdEncoding.DecodeString(symmetricKey)
+	if err != nil {
+		return err
+	}
+	cell, err := cell.ContextImprintWithKey(&keys.SymmetricKey{Value: keyBytes})
+	if err != nil || cell == nil {
+		return err
+	}
+	keyBytes, err = base64.StdEncoding.DecodeString(string(negativation.CustomerDocument))
+	if err != nil {
+		return err
+	}
+	decrypted, err := cell.Decrypt(keyBytes, []byte(encryptionContext))
+	if err != nil {
+		return err
+	}
+	cpf, err := NewCPF(string(decrypted))
+	if err != nil {
+		return err
+	}
+	negativation.CustomerDocument = cpf
+	return nil
 }
