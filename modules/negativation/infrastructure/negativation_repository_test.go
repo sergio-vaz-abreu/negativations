@@ -10,7 +10,7 @@ import (
 
 const (
 	databaseName   = "negativation"
-	collectionName = "negativations"
+	collectionName = "negativation-repository-test"
 )
 
 func TestNegativationRepositoryArangoDB(t *testing.T) {
@@ -27,7 +27,7 @@ func TestNegativationRepositoryArangoDB(t *testing.T) {
 
 	t.Run("Get empty negativation by cpf when not stored", func(t *testing.T) {
 		g := NewGomegaWithT(t)
-		sut, err := NewNegativationRepositoryArangoDB(database)
+		sut, err := NewNegativationRepositoryArangoDB(database, collectionName)
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
 		err = CleanCollection(t, collection)
@@ -45,7 +45,7 @@ func TestNegativationRepositoryArangoDB(t *testing.T) {
 
 	t.Run("Get negativations by cpf when stored", func(t *testing.T) {
 		g := NewGomegaWithT(t)
-		sut, err := NewNegativationRepositoryArangoDB(database)
+		sut, err := NewNegativationRepositoryArangoDB(database, collectionName)
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
 		err = CleanCollection(t, collection)
@@ -94,7 +94,7 @@ func TestNegativationRepositoryArangoDB(t *testing.T) {
 
 	t.Run("Sync negativations", func(t *testing.T) {
 		g := NewGomegaWithT(t)
-		sut, err := NewNegativationRepositoryArangoDB(database)
+		sut, err := NewNegativationRepositoryArangoDB(database, collectionName)
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
 		err = CleanCollection(t, collection)

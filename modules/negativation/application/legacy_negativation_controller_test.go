@@ -55,13 +55,14 @@ func TestLegacyNegativationController(t *testing.T) {
 	database, err := infrastructure.CreateDatabase(client, "negativation")
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
-	repo, err := infrastructure.NewNegativationRepositoryArangoDB(database)
+	collectionsName := "legacy-negativation-controller-test"
+	repo, err := infrastructure.NewNegativationRepositoryArangoDB(database, collectionsName)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
 	legacyRepo, err := infrastructure.NewNegativationLegacyRepositoryAPI(baseUrl)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
-	collection, err := infrastructure.CreateCollection(database, "negativations")
+	collection, err := infrastructure.CreateCollection(database, collectionsName)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
 	err = infrastructure.CleanCollection(t, collection)

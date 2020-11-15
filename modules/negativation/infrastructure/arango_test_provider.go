@@ -18,10 +18,12 @@ func InsertNegativations(_ testing.TB, collection driver.Collection, negativatio
 func GetNegativations(_ testing.TB, collection driver.Collection) ([]*domain.Negativation, error) {
 	query :=
 		`
-FOR n in negativations
+FOR n in @@collection
 RETURN n
 `
-	cursor, err := collection.Database().Query(nil, query, nil)
+	cursor, err := collection.Database().Query(nil, query, map[string]interface{}{
+		"@collection": collection.Name(),
+	})
 	if err != nil {
 		return nil, err
 	}

@@ -28,7 +28,7 @@ func TestApi(t *testing.T) {
 	collection, err := infrastructure.CreateCollection(database, "negativations")
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
-	sut, err := LoadAPI(8090, "http://localhost", symmetricKey, encryptionContext, ArangoConfig{
+	sut, err := LoadAPI(8090, "http://localhost:3000", symmetricKey, encryptionContext, ArangoConfig{
 		Host:     "localhost",
 		Port:     8529,
 		User:     "root",

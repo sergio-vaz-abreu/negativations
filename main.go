@@ -26,7 +26,7 @@ func main() {
 	}
 	app.Action = func(cliCtx *cli.Context) error {
 		config := api.ArangoConfig{
-			Host:     "localhost",
+			Host:     "arangodb",
 			Port:     8529,
 			User:     "root",
 			Password: "somepassword",
@@ -40,7 +40,8 @@ func main() {
 }
 
 func run(port int, config api.ArangoConfig) error {
-	app, err := api.LoadAPI(port, "http://localhost", "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg", "context", config)
+	logrus.Info("starting application")
+	app, err := api.LoadAPI(port, "http://api-gateway/legacy", "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg", "context", config)
 	if err != nil {
 		return err
 	}

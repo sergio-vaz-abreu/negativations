@@ -1,0 +1,19 @@
+apiVersion: ambassador/v1
+kind:  Module
+name:  ambassador
+config:
+  service_port: 80
+---
+apiVersion: ambassador/v1
+kind: Mapping
+name: negativations
+prefix: /
+service: negativations:8080
+headers:
+  Api-key: thi123456
+---
+apiVersion: ambassador/v1
+kind: Mapping
+name: legacy
+prefix: /legacy/
+service: json-server:3000

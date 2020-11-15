@@ -13,8 +13,24 @@ services:
 
   json-server:
     image: clue/json-server
+    entrypoint: 'bash -c "json-server /data/db.json"'
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./negativacoes.json:/data/db.json
+
+  negativations:
+    image: negativations:0.1.0
+    command: '-p=8080'
+    restart: always
+    ports:
+      - "8080:8080"
+
+  api-gateway:
+    image: quay.io/datawire/ambassador:0.72.0
     ports:
       - "80:80"
     restart: always
     volumes:
-      - ./negativacoes.json:/data/db.json
+      - ./ambassador.yaml:/ambassador/ambassador-config/ambassador.yaml

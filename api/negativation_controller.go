@@ -15,7 +15,7 @@ func createNegativationRepository(config ArangoConfig) (infrastructure.Negativat
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create database")
 	}
-	repository, err := infrastructure.NewNegativationRepositoryArangoDB(database)
+	repository, err := infrastructure.NewNegativationRepositoryArangoDB(database, "negativations")
 	return repository, errors.Wrap(err, "failed to create negativation repository")
 }
 

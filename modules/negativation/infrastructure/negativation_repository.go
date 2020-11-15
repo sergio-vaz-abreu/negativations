@@ -18,8 +18,8 @@ var (
 	SaveNegativationsErr      = errors.New("failed to save negativation")
 )
 
-func NewNegativationRepositoryArangoDB(database driver.Database) (*NegativationRepositoryArangoDB, error) {
-	collection, err := CreateCollection(database, "negativations")
+func NewNegativationRepositoryArangoDB(database driver.Database, collectionsName string) (*NegativationRepositoryArangoDB, error) {
+	collection, err := CreateCollection(database, collectionsName)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create negativations' collection")
 	}
@@ -88,7 +88,7 @@ func (repo *NegativationRepositoryArangoDB) removeOldNegativations(contracts []s
 		`
 FOR negativation IN @@collection
 FILTER negativation.contract not in @contracts
-REMOVE {_key: negativation._key} in @@collection
+REMOVE {_key: negativation._key} in @@collection OPTIONS {waitForSync: true}
 `
 	_, err := repo.collection.Database().Query(nil, query, map[string]interface{}{
 		"@collection": repo.collection.Name(),
@@ -116,7 +116,7 @@ func (repo *NegativationRepositoryArangoDB) upsertNegativation(negativation *dom
 		`
 UPSERT {contract: @contract}
 INSERT @negativation
-UPDATE @negativation in @@collection
+UPDATE @negativation in @@collection OPTIONS {waitForSync: true}
 `
 	_, err := repo.collection.Database().Query(nil, query, map[string]interface{}{
 		"@collection":  repo.collection.Name(),

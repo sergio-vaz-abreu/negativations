@@ -27,6 +27,9 @@ get-deps: ## Install projects dependencies with Go Module
 	go mod tidy
 	go mod vendor
 
+docker-build: build ## Build docker image
+	sudo docker build -t ${APPLICATION_NAME}:${BASE_VERSION} ./
+
 test: ## Run project tests
 	@echo "Running tests"
 	mkdir -p ./.test/cover

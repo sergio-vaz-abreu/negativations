@@ -17,10 +17,11 @@ func TestNegativationController(t *testing.T) {
 	database, err := infrastructure.CreateDatabase(client, "negativation")
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
-	repo, err := infrastructure.NewNegativationRepositoryArangoDB(database)
+	collectionName := "negativation-controller-test"
+	repo, err := infrastructure.NewNegativationRepositoryArangoDB(database, collectionName)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
-	collection, err := infrastructure.CreateCollection(database, "negativations")
+	collection, err := infrastructure.CreateCollection(database, collectionName)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
 	err = infrastructure.CleanCollection(t, collection)
