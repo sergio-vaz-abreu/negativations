@@ -4,13 +4,15 @@ import (
 	"github.com/negativations/modules/negativation/infrastructure"
 )
 
-func NewLegacyNegativationController(repository infrastructure.NegativationRepository, legacyRepository infrastructure.NegativationLegacyRepository) *LegacyNegativationController {
-	return &LegacyNegativationController{repository: repository, legacyRepository: legacyRepository}
+func NewLegacyNegativationController(repository infrastructure.NegativationRepository, legacyRepository infrastructure.NegativationLegacyRepository, symmetricKey string, encryptionContext string) *LegacyNegativationController {
+	return &LegacyNegativationController{repository: repository, legacyRepository: legacyRepository, symmetricKey: symmetricKey, encryptionContext: encryptionContext}
 }
 
 type LegacyNegativationController struct {
-	repository       infrastructure.NegativationRepository
-	legacyRepository infrastructure.NegativationLegacyRepository
+	repository        infrastructure.NegativationRepository
+	legacyRepository  infrastructure.NegativationLegacyRepository
+	symmetricKey      string
+	encryptionContext string
 }
 
 func (ctrl *LegacyNegativationController) Synchronize() error {
@@ -20,6 +22,10 @@ func (ctrl *LegacyNegativationController) Synchronize() error {
 	}
 	for _, negativation := range negativations {
 		negativation.UTC()
+		err = negativation.Encrypt(ctrl.symmetricKey, ctrl.encryptionContext)
+		if err != nil {
+			return err
+		}
 	}
 	return ctrl.repository.Synchronize(negativations...)
 }

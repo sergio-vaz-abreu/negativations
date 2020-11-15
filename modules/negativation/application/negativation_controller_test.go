@@ -29,6 +29,9 @@ func TestNegativationController(t *testing.T) {
 	negativation, err := domain.NewNegativation("59291534000167", "ABC S.A.", "51537476467", 1235.23, "bc063153-fb9e-4334-9a6c-0d069a42065b", "2015-11-13T20:32:51-03:00", "2020-11-13T20:32:51-03:00")
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
+	err = negativation.Encrypt(symmetricKey, encryptionContext)
+	g.Expect(err).Should(
+		Not(HaveOccurred()))
 	err = infrastructure.InsertNegativations(t, collection, negativation)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
@@ -36,7 +39,7 @@ func TestNegativationController(t *testing.T) {
 	t.Run("Validate cpf and get negativations", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 		cpf := "515.374.764-67"
-		sut := NewNegativationController(repo)
+		sut := NewNegativationController(repo, symmetricKey, encryptionContext)
 
 		negativations, err := sut.GetByCPF(cpf)
 

@@ -24,10 +24,10 @@ func createLegacyNegativationRepository(baseUrl string) (infrastructure.Negativa
 	return repository, errors.Wrap(err, "failed to create legacy negativation repository")
 }
 
-func createNegativationController(repository infrastructure.NegativationRepository) *application.NegativationController {
-	return application.NewNegativationController(repository)
+func createNegativationController(repository infrastructure.NegativationRepository, symmetricKey, encryptionContext string) *application.NegativationController {
+	return application.NewNegativationController(repository, symmetricKey, encryptionContext)
 }
 
-func createLegacyNegativationController(repository infrastructure.NegativationRepository, legacyRepository infrastructure.NegativationLegacyRepository) *application.LegacyNegativationController {
-	return application.NewLegacyNegativationController(repository, legacyRepository)
+func createLegacyNegativationController(repository infrastructure.NegativationRepository, legacyRepository infrastructure.NegativationLegacyRepository, symmetricKey, encryptionContext string) *application.LegacyNegativationController {
+	return application.NewLegacyNegativationController(repository, legacyRepository, symmetricKey, encryptionContext)
 }

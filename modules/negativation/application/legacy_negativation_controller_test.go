@@ -13,6 +13,11 @@ import (
 	"time"
 )
 
+const (
+	symmetricKey      = "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg"
+	encryptionContext = "context"
+)
+
 func TestLegacyNegativationController(t *testing.T) {
 	g := NewGomegaWithT(t)
 	handler := gin.Default()
@@ -74,7 +79,7 @@ func TestLegacyNegativationController(t *testing.T) {
 
 	t.Run("Synchronize negativations", func(t *testing.T) {
 		g := NewGomegaWithT(t)
-		sut := NewLegacyNegativationController(repo, legacyRepo)
+		sut := NewLegacyNegativationController(repo, legacyRepo, symmetricKey, encryptionContext)
 
 		err := sut.Synchronize()
 
@@ -86,7 +91,7 @@ func TestLegacyNegativationController(t *testing.T) {
 				ContainElement(PointTo(MatchAllFields(Fields{
 					"CompanyDocument":  BeEquivalentTo("59291534000167"),
 					"CompanyName":      BeEquivalentTo("ABC S.A."),
-					"CustomerDocument": BeEquivalentTo("51537476467"),
+					"CustomerDocument": BeEquivalentTo("FUNoBV5JaZEji6c="),
 					"Value":            BeEquivalentTo(2500.23),
 					"Contract":         BeEquivalentTo("bc063153-fb9e-4334-9a6c-0d069a42065b"),
 					"DebtDate":         BeEquivalentTo(time.Date(2015, 11, 13, 23, 32, 51, 0, time.UTC)),
@@ -95,7 +100,7 @@ func TestLegacyNegativationController(t *testing.T) {
 				ContainElement(PointTo(MatchAllFields(Fields{
 					"CompanyDocument":  BeEquivalentTo("77723018000146"),
 					"CompanyName":      BeEquivalentTo("123 S.A."),
-					"CustomerDocument": BeEquivalentTo("51537476467"),
+					"CustomerDocument": BeEquivalentTo("FUNoBV5JaZEji6c="),
 					"Value":            BeEquivalentTo(400.00),
 					"Contract":         BeEquivalentTo("5f206825-3cfe-412f-8302-cc1b24a179b0"),
 					"DebtDate":         BeEquivalentTo(time.Date(2015, 10, 12, 23, 32, 51, 0, time.UTC)),

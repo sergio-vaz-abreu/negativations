@@ -4,10 +4,17 @@ import (
 	"github.com/negativations/modules/negativation/domain"
 	"github.com/negativations/modules/negativation/infrastructure"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
+)
+
+const (
+	symmetricKey      = "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg"
+	encryptionContext = "context"
 )
 
 func TestApi(t *testing.T) {
@@ -21,7 +28,7 @@ func TestApi(t *testing.T) {
 	collection, err := infrastructure.CreateCollection(database, "negativations")
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
-	sut, err := LoadAPI(8090, "http://localhost", ArangoConfig{
+	sut, err := LoadAPI(8090, "http://localhost", symmetricKey, encryptionContext, ArangoConfig{
 		Host:     "localhost",
 		Port:     8529,
 		User:     "root",
@@ -38,6 +45,9 @@ func TestApi(t *testing.T) {
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
 		negativation, err := domain.NewNegativation("59291534000167", "ABC S.A.", "51537476467", 1235.23, "bc063153-fb9e-4334-9a6c-0d069a42065b", "2015-11-13T20:32:51-03:00", "2020-11-13T20:32:51-03:00")
+		g.Expect(err).Should(
+			Not(HaveOccurred()))
+		err = negativation.Encrypt(symmetricKey, encryptionContext)
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
 		err = infrastructure.InsertNegativations(t, collection, negativation)
@@ -84,6 +94,18 @@ func TestApi(t *testing.T) {
 			Not(HaveOccurred()))
 		g.Expect(httpResponse).Should(
 			HaveHTTPStatus(http.StatusOK))
+		g.Expect(infrastructure.GetNegativations(t, collection)).Should(
+			And(
+				HaveLen(5),
+				ContainElement(PointTo(MatchAllFields(Fields{
+					"CompanyDocument":  BeEquivalentTo("77723018000146"),
+					"CompanyName":      BeEquivalentTo("123 S.A."),
+					"CustomerDocument": BeEquivalentTo("FUNoBV5JaZEji6c="),
+					"Value":            BeEquivalentTo(400.00),
+					"Contract":         BeEquivalentTo("5f206825-3cfe-412f-8302-cc1b24a179b0"),
+					"DebtDate":         BeEquivalentTo(time.Date(2015, 10, 12, 23, 32, 51, 0, time.UTC)),
+					"InclusionDate":    BeEquivalentTo(time.Date(2020, 10, 12, 23, 32, 51, 0, time.UTC)),
+				})))))
 		g.Consistently(appErr).Should(
 			Not(Receive()))
 	})

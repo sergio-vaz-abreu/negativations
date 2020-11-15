@@ -40,7 +40,7 @@ func main() {
 }
 
 func run(port int, config api.ArangoConfig) error {
-	app, err := api.LoadAPI(port, "http://localhost", config)
+	app, err := api.LoadAPI(port, "http://localhost", "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg", "context", config)
 	if err != nil {
 		return err
 	}
