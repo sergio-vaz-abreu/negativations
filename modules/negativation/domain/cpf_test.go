@@ -56,3 +56,27 @@ func TestDoNotCreateInvalidCPF(t *testing.T) {
 		})
 	}
 }
+
+func TestEncryptCpf(t *testing.T) {
+	g := NewGomegaWithT(t)
+	sut := CPF("51537476467")
+
+	encryptedCpf, err := sut.Encrypt(symmetricKey, encryptionContext)
+
+	g.Expect(err).Should(
+		Not(HaveOccurred()))
+	g.Expect(encryptedCpf).Should(
+		BeEquivalentTo("FUNoBV5JaZEji6c="))
+}
+
+func TestDecryptCpf(t *testing.T) {
+	g := NewGomegaWithT(t)
+	sut := CPF("FUNoBV5JaZEji6c=")
+
+	decryptedCpf, err := sut.Decrypt(symmetricKey, encryptionContext)
+
+	g.Expect(err).Should(
+		Not(HaveOccurred()))
+	g.Expect(decryptedCpf).Should(
+		BeEquivalentTo("51537476467"))
+}
