@@ -2,7 +2,7 @@ package application
 
 import (
 	"github.com/negativations/modules/negativation/domain"
-	"github.com/negativations/modules/negativation/internal/infrastructure"
+	"github.com/negativations/modules/negativation/infrastructure"
 )
 
 func NewNegativationController(repository infrastructure.NegativationRepository) *NegativationController {

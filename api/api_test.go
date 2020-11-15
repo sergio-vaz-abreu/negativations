@@ -1,23 +1,21 @@
-package application
+package api
 
 import (
 	"github.com/negativations/modules/negativation/domain"
 	"github.com/negativations/modules/negativation/infrastructure"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gstruct"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"testing"
-	"time"
 )
 
-func TestNegativationController(t *testing.T) {
+func TestApi(t *testing.T) {
 	g := NewGomegaWithT(t)
 	client, err := infrastructure.NewClient("localhost", 8529, "root", "somepassword")
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
 	database, err := infrastructure.CreateDatabase(client, "negativation")
-	g.Expect(err).Should(
-		Not(HaveOccurred()))
-	repo, err := infrastructure.NewNegativationRepositoryArangoDB(database)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
 	collection, err := infrastructure.CreateCollection(database, "negativations")
@@ -32,25 +30,49 @@ func TestNegativationController(t *testing.T) {
 	err = infrastructure.InsertNegativations(t, collection, negativation)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
+	sut, err := LoadAPI(8090, ArangoConfig{
+		Host:     "localhost",
+		Port:     8529,
+		User:     "root",
+		Password: "somepassword",
+	})
+	g.Expect(err).Should(
+		Not(HaveOccurred()))
+	appErr := sut.Run()
+	g.Consistently(appErr).Should(
+		Not(Receive()))
 
-	t.Run("Validate cpf and get negativations", func(t *testing.T) {
+	t.Run("Get negativations", func(t *testing.T) {
 		g := NewGomegaWithT(t)
-		cpf := "515.374.764-67"
-		sut := NewNegativationController(repo)
 
-		negativations, err := sut.GetByCPF(cpf)
+		httpResponse, err := http.Get("http://localhost:8090/negativations?cpf=515.374.764-67")
 
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
-		g.Expect(negativations).Should(
-			ContainElement(PointTo(MatchAllFields(Fields{
-				"CompanyDocument":  BeEquivalentTo("59291534000167"),
-				"CompanyName":      BeEquivalentTo("ABC S.A."),
-				"CustomerDocument": BeEquivalentTo("51537476467"),
-				"Value":            BeEquivalentTo(1235.23),
-				"Contract":         BeEquivalentTo("bc063153-fb9e-4334-9a6c-0d069a42065b"),
-				"DebtDate":         BeEquivalentTo(time.Date(2015, 11, 13, 23, 32, 51, 0, time.UTC)),
-				"InclusionDate":    BeEquivalentTo(time.Date(2020, 11, 13, 23, 32, 51, 0, time.UTC)),
-			}))))
+		g.Expect(httpResponse).Should(
+			HaveHTTPStatus(http.StatusOK))
+		g.Expect(ReadHttpResponseBody(httpResponse.Body)).Should(
+			MatchJSON(`
+{
+  "status":"success",
+  "data":[
+    {
+      "companyDocument":"59291534000167",
+	  "companyName":"ABC S.A.",
+	  "customerDocument":"51537476467",
+	  "value":1235.23,
+	  "contract":"bc063153-fb9e-4334-9a6c-0d069a42065b",
+	  "debtDate":"2015-11-13T23:32:51Z",
+	  "inclusionDate":"2020-11-13T23:32:51Z"
+	}
+  ]
+}
+`))
+		g.Consistently(appErr).Should(
+			Not(Receive()))
 	})
+}
+
+func ReadHttpResponseBody(reader io.Reader) ([]byte, error) {
+	return ioutil.ReadAll(reader)
 }

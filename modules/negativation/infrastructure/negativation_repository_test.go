@@ -15,7 +15,7 @@ const (
 
 func TestNegativationRepositoryArangoDB(t *testing.T) {
 	g := NewGomegaWithT(t)
-	client, err := NewClient()
+	client, err := NewClient("localhost", 8529, "root", "somepassword")
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
 	database, err := CreateDatabase(client, databaseName)

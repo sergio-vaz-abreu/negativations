@@ -20,6 +20,10 @@ func NewNegativationRepositoryArangoDB(database driver.Database) (*NegativationR
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create negativations' collection")
 	}
+	_, _, err = collection.EnsurePersistentIndex(nil, []string{"customerDocument"}, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create customerDocument index")
+	}
 	return &NegativationRepositoryArangoDB{collection: collection}, nil
 }
 

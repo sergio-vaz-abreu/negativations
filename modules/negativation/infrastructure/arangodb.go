@@ -1,20 +1,21 @@
 package infrastructure
 
 import (
+	"fmt"
 	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
 )
 
-func NewClient() (driver.Client, error) {
+func NewClient(host string, port int, user, password string) (driver.Client, error) {
 	conn, err := http.NewConnection(http.ConnectionConfig{
-		Endpoints: []string{"tcp://localhost:8529"},
+		Endpoints: []string{fmt.Sprintf("tcp://%s:%d", host, port)},
 	})
 	if err != nil {
 		return nil, err
 	}
 	client, err := driver.NewClient(driver.ClientConfig{
 		Connection:     conn,
-		Authentication: driver.BasicAuthentication("root", "somepassword"),
+		Authentication: driver.BasicAuthentication(user, password),
 	})
 	return client, err
 }

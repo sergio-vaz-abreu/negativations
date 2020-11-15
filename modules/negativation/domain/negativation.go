@@ -13,7 +13,7 @@ var (
 func NewNegativation(
 	companyDocument string,
 	companyName string,
-	customerDocument CPF,
+	customerDocument string,
 	value float64,
 	contract string,
 	rawDebtDate string,
@@ -27,10 +27,14 @@ func NewNegativation(
 	if err != nil {
 		return nil, InvalidInclusionDateFormat
 	}
+	cpf, err := NewCPF(customerDocument)
+	if err != nil {
+		return nil, err
+	}
 	return &Negativation{
 		CompanyDocument:  companyDocument,
 		CompanyName:      companyName,
-		CustomerDocument: customerDocument,
+		CustomerDocument: cpf,
 		Value:            value,
 		Contract:         contract,
 		DebtDate:         debtDate.UTC(),
