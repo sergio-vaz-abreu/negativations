@@ -21,16 +21,7 @@ func TestApi(t *testing.T) {
 	collection, err := infrastructure.CreateCollection(database, "negativations")
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
-	err = infrastructure.CleanCollection(t, collection)
-	g.Expect(err).Should(
-		Not(HaveOccurred()))
-	negativation, err := domain.NewNegativation("59291534000167", "ABC S.A.", "51537476467", 1235.23, "bc063153-fb9e-4334-9a6c-0d069a42065b", "2015-11-13T20:32:51-03:00", "2020-11-13T20:32:51-03:00")
-	g.Expect(err).Should(
-		Not(HaveOccurred()))
-	err = infrastructure.InsertNegativations(t, collection, negativation)
-	g.Expect(err).Should(
-		Not(HaveOccurred()))
-	sut, err := LoadAPI(8090, ArangoConfig{
+	sut, err := LoadAPI(8090, "http://localhost", ArangoConfig{
 		Host:     "localhost",
 		Port:     8529,
 		User:     "root",
@@ -43,9 +34,18 @@ func TestApi(t *testing.T) {
 		Not(Receive()))
 
 	t.Run("Get negativations", func(t *testing.T) {
+		err = infrastructure.CleanCollection(t, collection)
+		g.Expect(err).Should(
+			Not(HaveOccurred()))
+		negativation, err := domain.NewNegativation("59291534000167", "ABC S.A.", "51537476467", 1235.23, "bc063153-fb9e-4334-9a6c-0d069a42065b", "2015-11-13T20:32:51-03:00", "2020-11-13T20:32:51-03:00")
+		g.Expect(err).Should(
+			Not(HaveOccurred()))
+		err = infrastructure.InsertNegativations(t, collection, negativation)
+		g.Expect(err).Should(
+			Not(HaveOccurred()))
 		g := NewGomegaWithT(t)
 
-		httpResponse, err := http.Get("http://localhost:8090/negativations?cpf=515.374.764-67")
+		httpResponse, err := http.Get("http://localhost:8090/negativation?cpf=515.374.764-67")
 
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
@@ -68,6 +68,22 @@ func TestApi(t *testing.T) {
   ]
 }
 `))
+		g.Consistently(appErr).Should(
+			Not(Receive()))
+	})
+
+	t.Run("Synchronize negativations", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		err := infrastructure.CleanCollection(t, collection)
+		g.Expect(err).Should(
+			Not(HaveOccurred()))
+
+		httpResponse, err := http.Post("http://localhost:8090/negativation/synchronize", "application/json", nil)
+
+		g.Expect(err).Should(
+			Not(HaveOccurred()))
+		g.Expect(httpResponse).Should(
+			HaveHTTPStatus(http.StatusOK))
 		g.Consistently(appErr).Should(
 			Not(Receive()))
 	})

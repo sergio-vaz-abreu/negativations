@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func createNegativationController(config ArangoConfig) (*application.NegativationController, error) {
+func createNegativationRepository(config ArangoConfig) (infrastructure.NegativationRepository, error) {
 	client, err := infrastructure.NewClient(config.Host, config.Port, config.User, config.Password)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create arango client")
@@ -16,9 +16,18 @@ func createNegativationController(config ArangoConfig) (*application.Negativatio
 		return nil, errors.Wrap(err, "failed to create database")
 	}
 	repository, err := infrastructure.NewNegativationRepositoryArangoDB(database)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create negativation repository")
-	}
-	controller := application.NewNegativationController(repository)
-	return controller, nil
+	return repository, errors.Wrap(err, "failed to create negativation repository")
+}
+
+func createLegacyNegativationRepository(baseUrl string) (infrastructure.NegativationLegacyRepository, error) {
+	repository, err := infrastructure.NewNegativationLegacyRepositoryAPI(baseUrl)
+	return repository, errors.Wrap(err, "failed to create legacy negativation repository")
+}
+
+func createNegativationController(repository infrastructure.NegativationRepository) *application.NegativationController {
+	return application.NewNegativationController(repository)
+}
+
+func createLegacyNegativationController(repository infrastructure.NegativationRepository, legacyRepository infrastructure.NegativationLegacyRepository) *application.LegacyNegativationController {
+	return application.NewLegacyNegativationController(repository, legacyRepository)
 }

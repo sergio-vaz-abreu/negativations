@@ -16,7 +16,7 @@ import (
 func TestLegacyNegativationController(t *testing.T) {
 	g := NewGomegaWithT(t)
 	handler := gin.Default()
-	handler.GET("negativations", func(context *gin.Context) {
+	handler.GET("negativation", func(context *gin.Context) {
 		data := `
 [
   {

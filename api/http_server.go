@@ -4,29 +4,32 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/negativations/modules/negativation/application"
-	"github.com/negativations/modules/negativation/domain"
 	"github.com/samora/gin-jsend"
 	"net/http"
 )
 
-func createHttpServer(port int, negativationController *application.NegativationController) *http.Server {
-	handler := createHandler(negativationController)
+func createHttpServer(port int, negativationController *application.NegativationController, legacyNegativationController *application.LegacyNegativationController) *http.Server {
+	handler := createHandler(negativationController, legacyNegativationController)
 	return &http.Server{Addr: fmt.Sprintf(":%d", port), Handler: handler}
 }
 
-func createHandler(negativationController *application.NegativationController) http.Handler {
+func createHandler(negativationController *application.NegativationController, legacyNegativationController *application.LegacyNegativationController) http.Handler {
 	handler := gin.Default()
-	handler.GET("negativations", func(context *gin.Context) {
+	handler.GET("negativation", func(context *gin.Context) {
 		negativations, err := negativationController.GetByCPF(context.Query("cpf"))
 		sendJsendResponse(context, negativations, err)
+	})
+	handler.POST("negativation/synchronize", func(context *gin.Context) {
+		err := legacyNegativationController.Synchronize()
+		sendJsendResponse(context, nil, err)
 	})
 	return handler
 }
 
-func sendJsendResponse(context *gin.Context, negativations []*domain.Negativation, err error) {
+func sendJsendResponse(context *gin.Context, data interface{}, err error) {
 	if err != nil {
 		jsend.Error(context, http.StatusInternalServerError, err.Error(), 0, nil)
 		return
 	}
-	jsend.Success(context, http.StatusOK, negativations)
+	jsend.Success(context, http.StatusOK, data)
 }

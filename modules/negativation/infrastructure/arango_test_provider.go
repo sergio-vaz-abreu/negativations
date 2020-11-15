@@ -7,7 +7,7 @@ import (
 )
 
 func CleanCollection(_ testing.TB, collection driver.Collection) error {
-	return collection.Truncate(nil)
+	return collection.Truncate(driver.WithWaitForSync(nil, true))
 }
 
 func InsertNegativations(_ testing.TB, collection driver.Collection, negativations ...*domain.Negativation) error {

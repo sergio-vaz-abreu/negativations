@@ -13,7 +13,7 @@ import (
 
 func TestNegativationLegacyRepositoryAPI(t *testing.T) {
 	handler := gin.Default()
-	handler.GET("negativations", func(context *gin.Context) {
+	handler.GET("negativation", func(context *gin.Context) {
 		data := `
 [
   {

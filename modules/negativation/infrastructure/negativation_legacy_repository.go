@@ -32,7 +32,7 @@ type NegativationLegacyRepositoryAPI struct {
 }
 
 func (r *NegativationLegacyRepositoryAPI) GetAll() ([]*domain.Negativation, error) {
-	httpResponse, err := http.Get(fmt.Sprintf("%s/%s", r.baseUrl, "negativations"))
+	httpResponse, err := http.Get(fmt.Sprintf("%s/%s", r.baseUrl, "negativation"))
 	if err != nil {
 		logrus.
 			WithError(err).

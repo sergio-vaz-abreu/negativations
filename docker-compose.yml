@@ -11,3 +11,10 @@ services:
     volumes:
       - ./.docker/arangodb:/var/lib/arangodb3
 
+  json-server:
+    image: clue/json-server
+    ports:
+      - "80:80"
+    restart: always
+    volumes:
+      - ./negativacoes.json:/data/db.json
