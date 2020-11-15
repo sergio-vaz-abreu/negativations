@@ -51,3 +51,8 @@ type Negativation struct {
 	DebtDate         time.Time `json:"debtDate"`
 	InclusionDate    time.Time `json:"inclusionDate"`
 }
+
+func (negativation *Negativation) UTC() {
+	negativation.DebtDate = negativation.DebtDate.UTC()
+	negativation.InclusionDate = negativation.InclusionDate.UTC()
+}

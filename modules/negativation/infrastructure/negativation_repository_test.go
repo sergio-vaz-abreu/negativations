@@ -119,7 +119,7 @@ func TestNegativationRepositoryArangoDB(t *testing.T) {
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
 
-		err = sut.SyncNegativations(fourthNegativation, fifthNegativation)
+		err = sut.Synchronize(fourthNegativation, fifthNegativation)
 
 		g.Expect(err).Should(
 			Not(HaveOccurred()))

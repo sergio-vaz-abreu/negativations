@@ -9,6 +9,7 @@ import (
 
 type NegativationRepository interface {
 	GetByCPF(cpf domain.CPF) ([]*domain.Negativation, error)
+	Synchronize(negativations ...*domain.Negativation) error
 }
 
 var (
@@ -67,7 +68,7 @@ RETURN negativation
 	return negativations, nil
 }
 
-func (repo *NegativationRepositoryArangoDB) SyncNegativations(negativations ...*domain.Negativation) error {
+func (repo *NegativationRepositoryArangoDB) Synchronize(negativations ...*domain.Negativation) error {
 	contracts := repo.getContractList(negativations)
 	err := repo.removeOldNegativations(contracts)
 	if err != nil {
