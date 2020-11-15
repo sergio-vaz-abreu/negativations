@@ -14,3 +14,25 @@ func InsertNegativations(_ testing.TB, collection driver.Collection, negativatio
 	_, _, err := collection.CreateDocuments(driver.WithWaitForSync(nil, true), negativations)
 	return err
 }
+
+func GetNegativations(_ testing.TB, collection driver.Collection) ([]*domain.Negativation, error) {
+	query :=
+		`
+FOR n in negativations
+RETURN n
+`
+	cursor, err := collection.Database().Query(nil, query, nil)
+	if err != nil {
+		return nil, err
+	}
+	var negativations []*domain.Negativation
+	for cursor.HasMore() {
+		var negativation domain.Negativation
+		_, err := cursor.ReadDocument(nil, &negativation)
+		if err != nil {
+			return nil, err
+		}
+		negativations = append(negativations, &negativation)
+	}
+	return negativations, nil
+}
