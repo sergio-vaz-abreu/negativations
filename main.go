@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"github.com/micro/go-micro/config"
+	"github.com/micro/go-micro/config/source/file"
 	"github.com/negativations/api"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
@@ -10,38 +13,25 @@ import (
 )
 
 func main() {
-	var port int
+	var filename string
 	app := cli.NewApp()
 	app.Name = ApplicationName
 	app.Description = "A application for legacy negativations integration"
 	app.Version = Version + "(" + GitCommit + ")"
 	app.EnableBashCompletion = true
 	app.Flags = []cli.Flag{
-		cli.IntFlag{
-			Name:        "port, p",
-			Usage:       "Port which the API will run",
-			Value:       80,
-			Destination: &port,
+		cli.StringFlag{
+			Name:        "config, c",
+			Usage:       "Configuration file",
+			Value:       "config.json",
+			Destination: &filename,
 		},
 	}
 	app.Action = func(cliCtx *cli.Context) error {
-		applicationConfig := api.ApplicationConfig{
-			SymmetricKeyConfig: api.SymmetricKeyConfig{
-				SymmetricKey:      "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg",
-				EncryptionContext: "context",
-			},
-			ApiConfig: api.ApiConfig{
-				Port: port,
-			},
-			ArangoConfig: api.ArangoConfig{
-				Host:     "arangodb",
-				Port:     8529,
-				User:     "root",
-				Password: "somepassword",
-			},
-			LegacyConfig: api.LegacyConfig{
-				Url: "http://api-gateway/legacy",
-			},
+		var applicationConfig api.ApplicationConfig
+		err := loadFile(filename, &applicationConfig)
+		if err != nil {
+			return err
 		}
 		return run(applicationConfig)
 	}
@@ -78,4 +68,14 @@ func gracefullyShutdown() context.Context {
 		cancel()
 	}()
 	return ctx
+}
+
+func loadFile(filename string, data interface{}) error {
+	if err := config.Load(file.NewSource(
+		file.WithPath(filename),
+	)); err != nil {
+		return errors.Wrap(err, "failed to loading file")
+	}
+	err := config.Scan(&data)
+	return errors.Wrap(err, "failed parsing data from file")
 }

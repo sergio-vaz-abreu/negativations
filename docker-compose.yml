@@ -22,10 +22,12 @@ services:
 
   negativations:
     image: negativations:0.1.0
-    command: '-p=8080'
+    command: ["--config=/app/config.json"]
     restart: always
     ports:
       - "8080:8080"
+    volumes:
+      - ./config.json:/app/config.json
 
   api-gateway:
     image: quay.io/datawire/ambassador:0.72.0

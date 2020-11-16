@@ -13,7 +13,7 @@ type SymmetricKeyConfig struct {
 }
 
 type ApiConfig struct {
-	Port int `json:"host"`
+	Port int `json:"port"`
 }
 
 type ArangoConfig struct {
