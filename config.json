@@ -1,0 +1,18 @@
+{
+  "symmetricKeyConfig": {
+    "symmetricKey": "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg",
+    "encryptionContext": "context"
+  },
+  "apiConfig": {
+    "port": 8080
+  },
+  "arangoConfig": {
+    "host": "arangodb",
+    "port": 8529,
+    "user": "root",
+    "password": "somepassword"
+  },
+  "legacyConfig": {
+    "url": "http://api-gateway/legacy"
+  }
+}
