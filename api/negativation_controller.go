@@ -19,15 +19,15 @@ func createNegativationRepository(config ArangoConfig) (infrastructure.Negativat
 	return repository, errors.Wrap(err, "failed to create negativation repository")
 }
 
-func createLegacyNegativationRepository(baseUrl string) (infrastructure.NegativationLegacyRepository, error) {
-	repository, err := infrastructure.NewNegativationLegacyRepositoryAPI(baseUrl)
+func createLegacyNegativationRepository(config LegacyConfig) (infrastructure.NegativationLegacyRepository, error) {
+	repository, err := infrastructure.NewNegativationLegacyRepositoryAPI(config.Url)
 	return repository, errors.Wrap(err, "failed to create legacy negativation repository")
 }
 
-func createNegativationController(repository infrastructure.NegativationRepository, symmetricKey, encryptionContext string) *application.NegativationController {
-	return application.NewNegativationController(repository, symmetricKey, encryptionContext)
+func createNegativationController(repository infrastructure.NegativationRepository, config SymmetricKeyConfig) *application.NegativationController {
+	return application.NewNegativationController(repository, config.SymmetricKey, config.EncryptionContext)
 }
 
-func createLegacyNegativationController(repository infrastructure.NegativationRepository, legacyRepository infrastructure.NegativationLegacyRepository, symmetricKey, encryptionContext string) *application.LegacyNegativationController {
-	return application.NewLegacyNegativationController(repository, legacyRepository, symmetricKey, encryptionContext)
+func createLegacyNegativationController(repository infrastructure.NegativationRepository, legacyRepository infrastructure.NegativationLegacyRepository, config SymmetricKeyConfig) *application.LegacyNegativationController {
+	return application.NewLegacyNegativationController(repository, legacyRepository, config.SymmetricKey, config.EncryptionContext)
 }

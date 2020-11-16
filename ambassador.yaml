@@ -10,7 +10,7 @@ name: negativations
 prefix: /
 service: negativations:8080
 headers:
-  Api-key: thi123456
+  Api-key: c5b6e72c-5b04-4bd2-ba5e-c85a253191dc
 ---
 apiVersion: ambassador/v1
 kind: Mapping

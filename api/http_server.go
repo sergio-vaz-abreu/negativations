@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-func createHttpServer(port int, negativationController *application.NegativationController, legacyNegativationController *application.LegacyNegativationController) *http.Server {
+func createHttpServer(config ApiConfig, negativationController *application.NegativationController, legacyNegativationController *application.LegacyNegativationController) *http.Server {
 	handler := createHandler(negativationController, legacyNegativationController)
-	return &http.Server{Addr: fmt.Sprintf(":%d", port), Handler: handler}
+	return &http.Server{Addr: fmt.Sprintf(":%d", config.Port), Handler: handler}
 }
 
 func createHandler(negativationController *application.NegativationController, legacyNegativationController *application.LegacyNegativationController) http.Handler {

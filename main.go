@@ -25,13 +25,25 @@ func main() {
 		},
 	}
 	app.Action = func(cliCtx *cli.Context) error {
-		config := api.ArangoConfig{
-			Host:     "arangodb",
-			Port:     8529,
-			User:     "root",
-			Password: "somepassword",
+		applicationConfig := api.ApplicationConfig{
+			SymmetricKeyConfig: api.SymmetricKeyConfig{
+				SymmetricKey:      "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg",
+				EncryptionContext: "context",
+			},
+			ApiConfig: api.ApiConfig{
+				Port: port,
+			},
+			ArangoConfig: api.ArangoConfig{
+				Host:     "arangodb",
+				Port:     8529,
+				User:     "root",
+				Password: "somepassword",
+			},
+			LegacyConfig: api.LegacyConfig{
+				Url: "http://api-gateway/legacy",
+			},
 		}
-		return run(port, config)
+		return run(applicationConfig)
 	}
 	err := app.Run(os.Args)
 	if err != nil {
@@ -39,9 +51,9 @@ func main() {
 	}
 }
 
-func run(port int, config api.ArangoConfig) error {
+func run(applicationConfig api.ApplicationConfig) error {
 	logrus.Info("starting application")
-	app, err := api.LoadAPI(port, "http://api-gateway/legacy", "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg", "context", config)
+	app, err := api.LoadAPI(applicationConfig)
 	if err != nil {
 		return err
 	}

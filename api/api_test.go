@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/negativations/modules/negativation/domain"
 	"github.com/negativations/modules/negativation/infrastructure"
 	. "github.com/onsi/gomega"
@@ -12,14 +13,10 @@ import (
 	"time"
 )
 
-const (
-	symmetricKey      = "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg"
-	encryptionContext = "context"
-)
-
 func TestApi(t *testing.T) {
 	g := NewGomegaWithT(t)
-	client, err := infrastructure.NewClient("localhost", 8529, "root", "somepassword")
+	config := MakeConfig()
+	client, err := infrastructure.NewClient(config.ArangoConfig.Host, config.ArangoConfig.Port, config.ArangoConfig.User, config.ArangoConfig.Password)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
 	database, err := infrastructure.CreateDatabase(client, "negativation")
@@ -28,12 +25,7 @@ func TestApi(t *testing.T) {
 	collection, err := infrastructure.CreateCollection(database, "negativations")
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
-	sut, err := LoadAPI(8090, "http://localhost:3000", symmetricKey, encryptionContext, ArangoConfig{
-		Host:     "localhost",
-		Port:     8529,
-		User:     "root",
-		Password: "somepassword",
-	})
+	sut, err := LoadAPI(config)
 	g.Expect(err).Should(
 		Not(HaveOccurred()))
 	appErr := sut.Run()
@@ -47,7 +39,7 @@ func TestApi(t *testing.T) {
 		negativation, err := domain.NewNegativation("59291534000167", "ABC S.A.", "51537476467", 1235.23, "bc063153-fb9e-4334-9a6c-0d069a42065b", "2015-11-13T20:32:51-03:00", "2020-11-13T20:32:51-03:00")
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
-		err = negativation.Encrypt(symmetricKey, encryptionContext)
+		err = negativation.Encrypt(config.SymmetricKeyConfig.SymmetricKey, config.SymmetricKeyConfig.EncryptionContext)
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
 		err = infrastructure.InsertNegativations(t, collection, negativation)
@@ -55,7 +47,7 @@ func TestApi(t *testing.T) {
 			Not(HaveOccurred()))
 		g := NewGomegaWithT(t)
 
-		httpResponse, err := http.Get("http://localhost:8090/negativation?cpf=515.374.764-67")
+		httpResponse, err := http.Get(fmt.Sprintf("http://localhost:%d/negativation?cpf=515.374.764-67", config.ApiConfig.Port))
 
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
@@ -88,7 +80,7 @@ func TestApi(t *testing.T) {
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
 
-		httpResponse, err := http.Post("http://localhost:8090/negativation/synchronize", "application/json", nil)
+		httpResponse, err := http.Post(fmt.Sprintf("http://localhost:%d/negativation/synchronize", config.ApiConfig.Port), "application/json", nil)
 
 		g.Expect(err).Should(
 			Not(HaveOccurred()))
@@ -109,6 +101,28 @@ func TestApi(t *testing.T) {
 		g.Consistently(appErr).Should(
 			Not(Receive()))
 	})
+}
+
+func MakeConfig() ApplicationConfig {
+	return ApplicationConfig{
+		SymmetricKeyConfig: SymmetricKeyConfig{
+			SymmetricKey:      "UkVDMgAAAC13PCVZAKOczZXUpvkhsC+xvwWnv3CLmlG0Wzy8ZBMnT+2yx/dg",
+			EncryptionContext: "context",
+		},
+		ApiConfig: ApiConfig{
+			Port: 8090,
+		},
+		ArangoConfig: ArangoConfig{
+			Host:     "localhost",
+			Port:     8529,
+			User:     "root",
+			Password: "somepassword",
+		},
+		LegacyConfig: LegacyConfig{
+			Url: "http://localhost:3000",
+		},
+	}
+
 }
 
 func ReadHttpResponseBody(reader io.Reader) ([]byte, error) {

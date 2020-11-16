@@ -18,17 +18,21 @@ help: ## This help.
 
 default: help
 
-build: ## Build project for native production
-	@echo "building ${BIN_NAME} ${BASE_VERSION}"
-	go build -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" -o .bin/${BIN_NAME} ./
-
 get-deps: ## Install projects dependencies with Go Module
 	@echo "Getting dependencies"
 	go mod tidy
 	go mod vendor
 
+build: get-deps ## Build project for native production
+	@echo "building ${BIN_NAME} ${BASE_VERSION}"
+	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" -o .bin/${BIN_NAME} ./
+
 docker-build: build ## Build docker image
 	sudo docker build -t ${APPLICATION_NAME}:${BASE_VERSION} ./
+
+init: docker-build ## Initializing everything
+	@echo "Initializing"
+	sudo docker-compose up -d
 
 test: ## Run project tests
 	@echo "Running tests"

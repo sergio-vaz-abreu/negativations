@@ -6,18 +6,18 @@ import (
 	"net/http"
 )
 
-func LoadAPI(port int, baseUrl string, symmetricKey, encryptionContext string, config ArangoConfig) (*Api, error) {
-	repository, err := createNegativationRepository(config)
+func LoadAPI(config ApplicationConfig) (*Api, error) {
+	repository, err := createNegativationRepository(config.ArangoConfig)
 	if err != nil {
 		return nil, err
 	}
-	legacyRepository, err := createLegacyNegativationRepository(baseUrl)
+	legacyRepository, err := createLegacyNegativationRepository(config.LegacyConfig)
 	if err != nil {
 		return nil, err
 	}
-	negativationController := createNegativationController(repository, symmetricKey, encryptionContext)
-	legacyNegativationController := createLegacyNegativationController(repository, legacyRepository, symmetricKey, encryptionContext)
-	httpServer := createHttpServer(port, negativationController, legacyNegativationController)
+	negativationController := createNegativationController(repository, config.SymmetricKeyConfig)
+	legacyNegativationController := createLegacyNegativationController(repository, legacyRepository, config.SymmetricKeyConfig)
+	httpServer := createHttpServer(config.ApiConfig, negativationController, legacyNegativationController)
 	return &Api{httpServer: httpServer}, nil
 }
 
